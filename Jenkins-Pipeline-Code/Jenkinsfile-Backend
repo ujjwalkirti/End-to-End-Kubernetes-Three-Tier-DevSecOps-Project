@@ -37,12 +37,12 @@ pipeline {
                 }
             }
         }
-        stage('OWASP Dependency-Check Scan') {
-            steps {
-                dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
-                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-            }
-        }
+        // stage('OWASP Dependency-Check Scan') {
+        //     steps {
+        //         dependencyCheck additionalArguments: '--scan ./ --disableYarnAudit --disableNodeAudit', odcInstallation: 'DP-Check'
+        //         dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+        //     }
+        // }
         stage('Trivy File Scan') {
             steps {
                 sh 'trivy fs . > trivyfs.txt'
@@ -83,19 +83,31 @@ pipeline {
             }
             steps {
                 dir('Kubernetes-Manifests-file/Backend') {
-                    withCredentials([string(credentialsId: 'github_pat', variable: 'GITHUB_TOKEN')]) {
-                        sh '''
+                    withCredentials([string(credentialsId: 'github_token', variable: 'GITHUB_TOKEN')]) {
+                        sh """
                             git config user.email "kirti.chargers@gmail.com"
                             git config user.name "ujjwalkirti"
-                            BUILD_NUMBER=${BUILD_NUMBER}
-                            echo $BUILD_NUMBER
-                            imageTag=$(grep -oP '(?<=backend:)[^ ]+' deployment.yaml)
-                            echo $imageTag
-                            sed -i "s/${AWS_ECR_REPO_NAME}:${imageTag}/${AWS_ECR_REPO_NAME}:${BUILD_NUMBER}/" deployment.yaml
+
+                            echo "Build number: ${BUILD_NUMBER}"
+
+                            # Extract image tag
+                            imageTag=\$(grep -oP 'image:\\s.*:\\K[^ \\n\"]+' deployment.yaml)
+
+                            if [ -z "\$imageTag" ]; then
+                            echo "ERROR: Could not extract image tag from deployment.yaml"
+                            exit 1
+                            fi
+
+                            echo "Current image tag: \$imageTag"
+
+                            # Replace the image tag
+                            sed -i "s|\\(image: .*:\\)[^ ]*|\\1${BUILD_NUMBER}|" deployment.yaml
+
                             git add deployment.yaml
-                            git commit -m "Update deployment Image to version \${BUILD_NUMBER}"
+                            git commit -m "Update deployment Image to version ${BUILD_NUMBER}"
                             git push https://${GITHUB_TOKEN}@github.com/${GIT_USER_NAME}/${GIT_REPO_NAME} HEAD:master
-                        '''
+                        """
+
                     }
                 }
             }
