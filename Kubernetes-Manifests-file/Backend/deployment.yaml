@@ -25,7 +25,7 @@ spec:
       - name: ecr-registry-secret
       containers:
       - name: api
-        image: 951405501907.dkr.ecr.ap-south-1.amazonaws.com/learning-devops/react-native-ecommerce-api:1
+        image: 951405501907.dkr.ecr.ap-south-1.amazonaws.com/learning-devops/react-native-ecommerce-api:9
         imagePullPolicy: Always
         envFrom:
             - secretRef:
