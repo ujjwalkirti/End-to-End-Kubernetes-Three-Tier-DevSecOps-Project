@@ -18,8 +18,8 @@ pipeline {
         }
         stage('Checkout from Git') {
             steps {
-                git credentialsId: 'githubh_pat', url: 'https://github.com/ujjwalkirti/react-native-ecommerce-backend.git'
-            }
+            git branch: 'main', credentialsId: 'githubh_pat', url: 'https://github.com/ujjwalkirti/react-native-ecommerce-backend.git'
+        }
         }
         stage('Sonarqube Analysis') {
             steps {
