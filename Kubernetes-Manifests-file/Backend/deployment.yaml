@@ -21,15 +21,27 @@ spec:
       labels:
         role: api
     spec:
+      serviceAccountName: aws-secrets-sa
       imagePullSecrets:
       - name: ecr-registry-secret
+      volumes:
+      - name: secrets-store-inline
+        csi:
+          driver: secrets-store.csi.k8s.io
+          readOnly: true
+          volumeAttributes:
+            secretProviderClass: aws-secrets
       containers:
       - name: api
         image: 951405501907.dkr.ecr.ap-south-1.amazonaws.com/learning-devops/react-native-ecommerce-api:9
-        imagePullPolicy: Always
+        imagePullPolicy:
+        volumeMounts:
+        - name: secrets-store-inline
+          mountPath: "/mnt/secrets-store"
+          readOnly: true
         envFrom:
             - secretRef:
-                name: aws-secrets
+                name: api-secrets
         ports:
         - containerPort: 8000
         livenessProbe:
