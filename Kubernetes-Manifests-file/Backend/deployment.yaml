@@ -29,7 +29,7 @@ spec:
         imagePullPolicy: Always
         envFrom:
             - secretRef:
-                name: api-secrets
+                name: aws-secrets
         ports:
         - containerPort: 8000
         livenessProbe:
