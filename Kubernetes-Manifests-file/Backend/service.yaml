@@ -5,7 +5,8 @@ metadata:
   namespace: ecommerce-backend-api
 spec:
   ports:
-  - port: 3500
+  - port: 8000
+    targetPort: 8000
     protocol: TCP
   type: ClusterIP
   selector:
